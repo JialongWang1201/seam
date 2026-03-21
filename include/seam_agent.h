@@ -24,10 +24,27 @@
 
 static_assert(SEAM_RING_SIZE <= 255u, "SEAM_RING_SIZE must fit in uint8_t");
 
-/* ── Internal ring state (static — safe in fault handlers) ─────────────── */
-static cfl_record_t _seam_ring[SEAM_RING_SIZE];
-static uint16_t     _seam_head = 0;  /* next write slot (mod SEAM_RING_SIZE) */
-static uint16_t     _seam_seq  = 0;  /* monotonic event counter              */
+/* ── Internal ring state ─────────────────────────────────────────────────
+ *
+ * Define SEAM_IMPLEMENT in exactly ONE translation unit before including
+ * this header (typically your BSP port file, e.g. seam_port.c).
+ * All other TUs that call seam_emit() just include this header and share
+ * the same ring via external linkage.
+ *
+ *   seam_port.c:           #define SEAM_IMPLEMENT
+ *                          #include "seam_agent.h"
+ *
+ *   fault.c / kdi.c / ...: #include "seam_agent.h"   // extern decls only
+ */
+#ifdef SEAM_IMPLEMENT
+cfl_record_t _seam_ring[SEAM_RING_SIZE];
+uint16_t     _seam_head = 0u; /* next write slot (mod SEAM_RING_SIZE) */
+uint16_t     _seam_seq  = 0u; /* monotonic event counter              */
+#else
+extern cfl_record_t _seam_ring[];
+extern uint16_t     _seam_head;
+extern uint16_t     _seam_seq;
+#endif
 
 /* ── Port functions — implement these two in your BSP ──────────────────── */
 

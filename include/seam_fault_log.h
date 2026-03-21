@@ -62,7 +62,7 @@ typedef struct __attribute__((packed)) {
     uint32_t b;
     uint32_t c;
     uint32_t d;
-} cfl_record_t;            /* sizeof == 20 */
+} cfl_record_t;            /* sizeof == 24 (1+1+2+4+4+4+4+4, packed) */
 
 /* ── Bundle header ──────────────────────────────────────────────────────── */
 typedef struct __attribute__((packed)) {

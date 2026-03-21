@@ -37,7 +37,7 @@ VERDICT: KDI throttle cascaded into VM MMIO policy window expiry.
 ┌─────────────────────────────────────┐
 │              MCU                    │
 │  fault.c  kdi.c  vm32.c  RTOS      │
-│            causal_agent.h           │  ← one header, two port functions
+│            seam_agent.h             │  ← one header, two port functions
 │         UART / SWO (COBS)           │
 └──────────────┬──────────────────────┘
                │  .cfl bundle

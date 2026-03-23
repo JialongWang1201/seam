@@ -11,6 +11,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/* Portable sentinel for "not a valid length" — avoids SIZE_MAX which is
+ * not reliably defined by <stdint.h> on all bare-metal Newlib toolchains. */
+#ifndef SEAM_COBS_INVALID
+#  define SEAM_COBS_INVALID ((size_t)-1)
+#endif
+
 /* Encode src[0..src_len) into dst. Returns encoded length (not including
  * the trailing 0x00 delimiter — caller appends it).
  * dst must be at least src_len + src_len/254 + 2 bytes. */
@@ -43,7 +49,7 @@ static inline size_t seam_cobs_encode(const uint8_t *src, size_t src_len,
 }
 
 /* Decode src[0..src_len) (no trailing 0x00) into dst.
- * Returns decoded length, or SIZE_MAX on framing error. */
+ * Returns decoded length, or SEAM_COBS_INVALID on framing error. */
 static inline size_t seam_cobs_decode(const uint8_t *src, size_t src_len,
                                       uint8_t *dst)
 {
@@ -52,9 +58,9 @@ static inline size_t seam_cobs_decode(const uint8_t *src, size_t src_len,
 
     while (si < src_len) {
         uint8_t code = src[si++];
-        if (code == 0x00) return SIZE_MAX; /* unexpected delimiter */
+        if (code == 0x00) return SEAM_COBS_INVALID; /* unexpected delimiter */
         for (uint8_t i = 1; i < code; i++) {
-            if (si >= src_len) return SIZE_MAX;
+            if (si >= src_len) return SEAM_COBS_INVALID;
             dst[di++] = src[si++];
         }
         if (code < 0xFF && si < src_len)

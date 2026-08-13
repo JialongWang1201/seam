@@ -26,6 +26,10 @@ if(SEAM_BUILD_TESTS)
     target_include_directories(seam_test PRIVATE include)
     add_test(NAME seam_test COMMAND seam_test)
 
+    add_executable(seam_cobs_test test/test_cobs.c)
+    target_include_directories(seam_cobs_test PRIVATE include)
+    add_test(NAME seam_cobs_test COMMAND seam_cobs_test)
+
     # CLI binary used for fixture-based round-trip tests
     add_executable(seam_cli tools/seam_cli.c)
     target_link_libraries(seam_cli seam)

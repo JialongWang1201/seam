@@ -23,7 +23,7 @@
 static inline size_t seam_cobs_encode(const uint8_t *src, size_t src_len,
                                       uint8_t *dst)
 {
-    size_t  di = 0;
+    size_t  di = 1; /* reserve dst[0] for the first code byte */
     size_t  code_idx = 0;
     uint8_t code = 1;
 

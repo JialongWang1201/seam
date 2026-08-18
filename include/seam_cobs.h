@@ -48,10 +48,10 @@ static inline size_t seam_cobs_encode(const uint8_t *src, size_t src_len,
     return di;
 }
 
-/* Decode src[0..src_len) (no trailing 0x00) into dst.
- * Returns decoded length, or SEAM_COBS_INVALID on framing error. */
+/* Decode src[0..src_len) (no trailing 0x00) into dst[0..dst_capacity).
+ * Returns decoded length, or SEAM_COBS_INVALID on framing error or overflow. */
 static inline size_t seam_cobs_decode(const uint8_t *src, size_t src_len,
-                                      uint8_t *dst)
+                                      uint8_t *dst, size_t dst_capacity)
 {
     size_t di = 0;
     size_t si = 0;
@@ -61,10 +61,13 @@ static inline size_t seam_cobs_decode(const uint8_t *src, size_t src_len,
         if (code == 0x00) return SEAM_COBS_INVALID; /* unexpected delimiter */
         for (uint8_t i = 1; i < code; i++) {
             if (si >= src_len) return SEAM_COBS_INVALID;
+            if (di >= dst_capacity) return SEAM_COBS_INVALID;
             dst[di++] = src[si++];
         }
-        if (code < 0xFF && si < src_len)
+        if (code < 0xFF && si < src_len) {
+            if (di >= dst_capacity) return SEAM_COBS_INVALID;
             dst[di++] = 0x00;
+        }
     }
     return di;
 }

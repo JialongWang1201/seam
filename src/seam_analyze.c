@@ -22,12 +22,6 @@
 #include <string.h>
 #include <stdint.h>
 
-/* Seq comparison that handles uint16_t wrap-around */
-static inline int seq_lt(uint16_t a, uint16_t b)
-{
-    return (int16_t)(a - b) < 0;
-}
-
 /* Timestamp delta (both are relative SysTick values in the bundle) */
 static inline uint32_t tick_delta(uint32_t early, uint32_t late)
 {
@@ -129,7 +123,7 @@ int seam_analyze(const cfl_bundle_t *bundle, size_t bundle_len,
         if (out->depth < SEAM_CHAIN_MAX) {
             out->chain[out->depth].record     = &bundle->records[fault_idx];
             out->chain[out->depth].cause      = "fault anchor";
-            out->chain[out->depth].confidence = 100;
+            out->chain[out->depth].confidence = 0;
             out->depth++;
         } else {
             out->truncated = 1;

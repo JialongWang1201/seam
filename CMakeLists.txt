@@ -16,6 +16,10 @@ add_library(seam STATIC
 target_include_directories(seam PUBLIC include)
 target_compile_options(seam PRIVATE -Wall -Wextra -Wpedantic)
 
+add_executable(seam_cli tools/seam_cli.c)
+target_link_libraries(seam_cli seam)
+set_target_properties(seam_cli PROPERTIES OUTPUT_NAME "seam-analyze")
+
 # ── tests ─────────────────────────────────────────────────────────────────────
 if(SEAM_BUILD_TESTS)
     enable_testing()
@@ -30,10 +34,10 @@ if(SEAM_BUILD_TESTS)
     target_include_directories(seam_cobs_test PRIVATE include)
     add_test(NAME seam_cobs_test COMMAND seam_cobs_test)
 
-    # CLI binary used for fixture-based round-trip tests
-    add_executable(seam_cli tools/seam_cli.c)
-    target_link_libraries(seam_cli seam)
-    target_include_directories(seam_cli PRIVATE include)
+    add_executable(seam_agent_test test/test_agent.c)
+    target_include_directories(seam_agent_test PRIVATE include)
+    target_compile_options(seam_agent_test PRIVATE -Wall -Wextra -Werror -pedantic)
+    add_test(NAME seam_agent_wrap COMMAND seam_agent_test)
 
     # Fixture round-trip tests — exercises disk read + raw bundle parse + analysis
     set(FIXTURES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures)
@@ -59,5 +63,6 @@ endif()
 
 # ── install ───────────────────────────────────────────────────────────────────
 install(TARGETS seam ARCHIVE DESTINATION lib)
+install(TARGETS seam_cli RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include/seam
     FILES_MATCHING PATTERN "*.h")

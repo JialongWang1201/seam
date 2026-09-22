@@ -144,6 +144,20 @@ static void test_partial_fill(void)
     ASSERT(chain.depth >= 1, "partial fill: chain has at least 1 node");
 }
 
+static void test_unknown_without_rule(void)
+{
+    fixture_t f; fixture_init(&f);
+    fixture_add(&f, CFL_LAYER_HW, CFL_EV_FAULT_ENTRY, 10, 0, 0);
+    f.hdr.fault_seq = 0;
+    seam_chain_t chain;
+    int rc = seam_analyze((cfl_bundle_t *)&f, fixture_len(&f), &chain);
+    ASSERT(rc == SEAM_OK, "unmatched fault is analyzable");
+    ASSERT(strcmp(chain.verdict, "unknown fault") == 0,
+           "unmatched rule reports unknown fault");
+    ASSERT(chain.verdict_confidence == 0,
+           "unmatched rule reports zero confidence");
+}
+
 /* ── main ───────────────────────────────────────────────────────────────── */
 int main(void)
 {
@@ -156,6 +170,7 @@ int main(void)
     test_no_fault_anchor();
     test_kdi_cascade();
     test_partial_fill();
+    test_unknown_without_rule();
 
     printf("\n─────────────────────────────\n");
     if (failures == 0)

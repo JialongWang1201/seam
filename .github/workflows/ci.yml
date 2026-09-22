@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  host:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+      - name: Check installed CLI
+        run: |
+          cmake --install build --prefix "$PWD/stage"
+          test -x stage/bin/seam-analyze
+          stage/bin/seam-analyze test/fixtures/normal_kdi_cascade.cfl
+
+  mcu-header:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ARM compiler
+        run: sudo apt-get update -qq && sudo apt-get install -y gcc-arm-none-eabi
+      - name: Compile MCU header in strict C99 mode
+        run: |
+          arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -std=c99 \
+            -Wall -Wextra -Werror -pedantic -Iinclude \
+            -fsyntax-only test/mcu_header_compile.c
